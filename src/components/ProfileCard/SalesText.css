@@ -1,0 +1,98 @@
+/* ============================================
+   SalesText — Sales-page styled intro text
+   ============================================ */
+
+.sales-text {
+  padding: var(--space-3) 0;
+  text-align: left;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.sales-text--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sales-text__paragraph {
+  font-size: var(--font-size-base);
+  font-weight: 400;
+  color: var(--color-text-primary);
+  line-height: 1.75;
+  letter-spacing: 0.01em;
+}
+
+/* ── Highlighted words (name, age) ── */
+.sales-text__highlight {
+  font-weight: 700;
+  color: var(--color-text-primary);
+  position: relative;
+}
+
+.sales-text__highlight::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 2px;
+  background: var(--gradient-pink);
+  border-radius: 2px;
+  opacity: 0.6;
+}
+
+/* ── City name with special styling ── */
+.sales-text__city {
+  font-weight: 700;
+  color: transparent;
+  background: var(--gradient-pink);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+}
+
+/* Subtle glow behind city */
+.sales-text__city::before {
+  content: attr(data-city);
+  position: absolute;
+  left: 0;
+  top: 0;
+  filter: blur(12px);
+  opacity: 0.4;
+  color: var(--color-accent-pink);
+  -webkit-text-fill-color: var(--color-accent-pink);
+  pointer-events: none;
+}
+
+/* ── Heart emoji ── */
+.sales-text__heart {
+  display: inline-block;
+  font-size: 1.1em;
+  animation: pulse-glow 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px rgba(255, 45, 120, 0.5));
+}
+
+/* ── City in white (no gradient) ── */
+.sales-text__city-white {
+  font-weight: 400;
+  color: var(--color-text-primary);
+}
+
+/* ── Bold without underline ── */
+.sales-text__bold {
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .sales-text {
+    padding: var(--space-3) 0;
+  }
+
+  .sales-text__line {
+    font-size: var(--font-size-sm);
+  }
+}

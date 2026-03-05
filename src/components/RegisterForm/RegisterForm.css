@@ -1,0 +1,365 @@
+/* ============================================
+   REGISTER FORM — Dark Premium Theme
+   iOS-style drum date picker
+   ============================================ */
+
+/* ── Overlay ── */
+.reg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  animation: regFadeIn 0.3s ease-out;
+  padding: 20px;
+  overflow: hidden;
+}
+.reg-overlay--closing {
+  animation: regFadeOut 0.3s ease-in forwards;
+}
+
+/* ── Background teaser video ── */
+.reg-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(6px) brightness(0.45);
+  transform: scale(1.05); /* hide blur edges */
+  z-index: 0;
+  transition: filter 1.5s ease;
+}
+.reg-bg-video--ended {
+  filter: blur(12px) brightness(0.25);
+}
+
+.reg-bg-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.3) 0%,
+    rgba(0, 0, 0, 0.65) 100%
+  );
+  transition: background 1.5s ease;
+}
+.reg-bg-scrim--ended {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+}
+
+/* ── Card ── */
+.reg-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 380px;
+  background: linear-gradient(
+    145deg,
+    rgba(16, 16, 36, 0.95) 0%,
+    rgba(10, 10, 24, 0.98) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 32px 24px 24px;
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  animation: regSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reg-card--closing {
+  animation: regSlideDown 0.3s ease-in forwards;
+}
+
+/* ── Header ── */
+.reg-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.reg-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 6px;
+}
+
+.reg-subtitle {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+}
+
+/* ── Fields ── */
+.reg-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.reg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.reg-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.reg-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  box-sizing: border-box;
+}
+.reg-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+.reg-input:focus {
+  border-color: #ff2d78;
+  background: rgba(255, 45, 120, 0.06);
+}
+
+/* ── Drum Picker ── */
+.reg-drum-picker {
+  display: flex;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 8px 6px;
+  overflow: hidden;
+}
+
+.drum-col-wrapper {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  border-radius: 10px;
+  user-select: none;
+  touch-action: none;
+}
+
+.drum-col-scroll {
+  overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: auto;
+}
+.drum-col-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.drum-col-highlight {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  z-index: 1;
+  background: rgba(255, 45, 120, 0.12);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 45, 120, 0.25);
+  pointer-events: none;
+}
+
+.drum-col-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.drum-col-fade--top {
+  top: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(12, 12, 28, 0.95) 0%,
+    rgba(12, 12, 28, 0.6) 50%,
+    transparent 100%
+  );
+}
+.drum-col-fade--bottom {
+  bottom: 0;
+  background: linear-gradient(
+    to top,
+    rgba(12, 12, 28, 0.95) 0%,
+    rgba(12, 12, 28, 0.6) 50%,
+    transparent 100%
+  );
+}
+
+.drum-col-item {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+.drum-col-item--selected {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 16px;
+}
+.drum-col-item--empty {
+  pointer-events: none;
+}
+
+/* ── Error ── */
+.reg-error {
+  text-align: center;
+  color: #ef4444;
+  font-size: 13px;
+  margin: 0 0 12px;
+  animation: regShake 0.4s ease;
+}
+
+/* ── Submit Button ── */
+.reg-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 0;
+  background: linear-gradient(135deg, #ff2d78 0%, #ff6ba3 100%);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: inherit;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 8px 32px rgba(255, 45, 120, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.reg-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 4px 16px rgba(255, 45, 120, 0.25);
+}
+
+/* ── Animations ── */
+@keyframes regFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes regFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes regSlideUp {
+  from { opacity: 0; transform: translateY(40px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes regSlideDown {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(30px) scale(0.95); }
+}
+@keyframes regShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* ── Underage Block ── */
+.reg-underage-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: regFadeIn 0.3s ease-out;
+  padding: 20px;
+}
+
+.reg-underage-card {
+  position: relative;
+  text-align: center;
+  max-width: 320px;
+  padding: 40px 28px;
+  background: linear-gradient(
+    145deg,
+    rgba(40, 10, 10, 0.95) 0%,
+    rgba(20, 5, 5, 0.98) 100%
+  );
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 24px;
+  box-shadow: 0 24px 80px rgba(239, 68, 68, 0.2);
+  animation: regSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reg-underage-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+.reg-underage-close:active {
+  transform: scale(0.9);
+}
+
+.reg-underage-icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+}
+
+.reg-underage-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #ef4444;
+  margin: 0 0 12px;
+}
+
+.reg-underage-msg {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── Mobile ── */
+@media (max-width: 480px) {
+  .reg-card {
+    padding: 28px 18px 20px;
+    border-radius: 20px;
+  }
+  .reg-title { font-size: 18px; }
+  .reg-input { font-size: 14px; padding: 11px 14px; }
+  .reg-btn { font-size: 15px; padding: 13px 0; }
+}

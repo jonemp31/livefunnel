@@ -1,0 +1,29 @@
+# SPA - Redirecionar rotas para index.html (mas NÃO arquivos que existem)
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /salaprivada/
+  
+  # Não redirecionar se o arquivo existe
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+  
+  # Redirecionar tudo para index.html (apenas se não for arquivo existente)
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Configurar MIME types corretos
+<IfModule mod_mime.c>
+  AddType text/css .css
+  AddType application/javascript .js
+  AddType application/javascript .mjs
+  AddType text/html .html
+</IfModule>
+
+# Forçar HTTPS
+<IfModule mod_rewrite.c>
+  RewriteCond %{HTTPS} off
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+

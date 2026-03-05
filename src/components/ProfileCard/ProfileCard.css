@@ -1,0 +1,51 @@
+/* ============================================
+   ProfileCard — Main Card Container
+   ============================================ */
+
+.profile-card {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--color-bg-secondary);
+  box-shadow: var(--shadow-card);
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* ── Glassmorphism Info Panel ── */
+.profile-card__panel {
+  position: relative;
+  margin-top: -40px;
+  z-index: 2;
+  background: var(--color-bg-card);
+  backdrop-filter: blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-xl) var(--radius-xl) var(--radius-xl) var(--radius-xl);
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  transition: background var(--transition-base);
+}
+
+.profile-card__panel:hover {
+  background: var(--color-bg-card-hover);
+}
+
+.profile-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .profile-card {
+    max-width: 100%;
+    border-radius: 0;
+  }
+
+  .profile-card__panel {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: var(--space-5) var(--space-4) var(--space-4);
+  }
+}

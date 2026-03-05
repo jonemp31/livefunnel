@@ -1,0 +1,35 @@
+/* ============================================
+   PersonalSignature — Bio / Quote
+   ============================================ */
+
+.personal-signature {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.personal-signature__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.personal-signature__icon {
+  font-size: 0.875rem;
+}
+
+.personal-signature__text {
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  font-style: italic;
+  padding-left: var(--space-1);
+  border-left: 2px solid rgba(255, 255, 255, 0.08);
+  margin-left: var(--space-1);
+}
