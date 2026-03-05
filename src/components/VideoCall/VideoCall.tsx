@@ -3,7 +3,8 @@ import Hls from 'hls.js'
 import './VideoCall.css'
 
 // URLs do vídeo - HLS como principal, MP4 como fallback
-const REMOTE_VIDEO_URL_HLS = ''
+const REMOTE_VIDEO_URL_HLS = '/hls/videolive/master.m3u8'
+const REMOTE_VIDEO_URL_HLS_2 = '/hls/videolive2/master.m3u8'
 const REMOTE_VIDEO_URL_MP4 = '/videolive.mp4'
 const REMOTE_VIDEO_URL_MP4_2 = '/videolive2.mp4'
 const AVATAR_URL = '/foto1.jpg'
@@ -1938,6 +1939,7 @@ export default function VideoCall({ onExit, onOpenClose }: VideoCallProps) {
   const handleEndCallClick = useCallback(() => setShowEndCallConfirm(true), [])
 
   const confirmEndCall = useCallback(() => {
+    if (hlsRef.current) { hlsRef.current.destroy(); hlsRef.current = null }
     if (remoteVideoRef.current) { remoteVideoRef.current.pause(); remoteVideoRef.current.src = '' }
     localStorage.setItem(STORAGE_KEY, 'true')
     setShowEndCallConfirm(false)
@@ -2044,17 +2046,47 @@ export default function VideoCall({ onExit, onOpenClose }: VideoCallProps) {
         const video = remoteVideoRef.current
         if (video) {
           video.pause()
-          video.src = REMOTE_VIDEO_URL_MP4_2
-          video.load()
-          const onCanPlay = () => {
-            video.removeEventListener('canplay', onCanPlay)
+          // Destroy existing HLS instance if any
+          if (hlsRef.current) { hlsRef.current.destroy(); hlsRef.current = null }
+
+          const onVideo2Ready = () => {
             setVideoEnded(false)
             setVideoPhase(2)
             video2StartTimeRef.current = Date.now()
             video.play().catch(() => {})
           }
-          video.addEventListener('canplay', onCanPlay)
-          video.addEventListener('ended', () => setVideoEnded(true), { once: true })
+
+          // Try HLS first for video 2, fallback to MP4
+          if (REMOTE_VIDEO_URL_HLS_2 && video.canPlayType('application/vnd.apple.mpegurl')) {
+            // Safari native HLS
+            video.src = REMOTE_VIDEO_URL_HLS_2
+            video.load()
+            video.addEventListener('canplay', () => onVideo2Ready(), { once: true })
+            video.addEventListener('ended', () => setVideoEnded(true), { once: true })
+          } else if (REMOTE_VIDEO_URL_HLS_2 && Hls.isSupported()) {
+            // hls.js for Chrome/Firefox
+            const hls2 = new Hls({ enableWorker: true, lowLatencyMode: false, backBufferLength: 90 })
+            hlsRef.current = hls2
+            hls2.loadSource(REMOTE_VIDEO_URL_HLS_2)
+            hls2.attachMedia(video)
+            hls2.on(Hls.Events.MANIFEST_PARSED, () => onVideo2Ready())
+            hls2.on(Hls.Events.ERROR, (_e, data) => {
+              if (data.fatal) {
+                // HLS failed, fallback to MP4
+                hls2.destroy(); hlsRef.current = null
+                video.src = REMOTE_VIDEO_URL_MP4_2
+                video.load()
+                video.addEventListener('canplay', () => onVideo2Ready(), { once: true })
+              }
+            })
+            video.addEventListener('ended', () => setVideoEnded(true), { once: true })
+          } else {
+            // No HLS support, use MP4 directly
+            video.src = REMOTE_VIDEO_URL_MP4_2
+            video.load()
+            video.addEventListener('canplay', () => onVideo2Ready(), { once: true })
+            video.addEventListener('ended', () => setVideoEnded(true), { once: true })
+          }
         }
       }
     }, 1000)
