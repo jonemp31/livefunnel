@@ -3,6 +3,7 @@ import './RegisterForm.css'
 
 interface RegisterFormProps {
   onSubmit: (data: { nickname: string; contact: string; birthDate: string }) => void
+  onDismiss?: () => void
 }
 
 // ── iOS-style Drum Picker Column ──
@@ -170,7 +171,7 @@ function isValidEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)
 }
 
-export default function RegisterForm({ onSubmit }: RegisterFormProps) {
+export default function RegisterForm({ onSubmit, onDismiss }: RegisterFormProps) {
   const [nickname, setNickname] = useState('')
   const [contact, setContact] = useState('')
   const [contactMode, setContactMode] = useState<'none' | 'phone' | 'email'>('none')
@@ -262,6 +263,13 @@ export default function RegisterForm({ onSubmit }: RegisterFormProps) {
       <div className={`reg-bg-scrim ${bgVideoEnded ? 'reg-bg-scrim--ended' : ''}`} />
 
       <div className={`reg-card ${closing ? 'reg-card--closing' : ''}`}>
+        {onDismiss && (
+          <button className="reg-close-btn" onClick={onDismiss} title="Fechar" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        )}
         <div className="reg-header">
           <h2 className="reg-title">Criar perfil para entrar</h2>
           <p className="reg-subtitle">Preencha para acessar a sala ao vivo</p>
@@ -312,6 +320,12 @@ export default function RegisterForm({ onSubmit }: RegisterFormProps) {
             <path d="M5 12h14M12 5l7 7-7 7"/>
           </svg>
         </button>
+
+        {onDismiss && (
+          <button className="reg-dismiss-link" onClick={onDismiss} type="button">
+            Não quero me registrar agora
+          </button>
+        )}
       </div>
 
       {/* Underage block overlay */}

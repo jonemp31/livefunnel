@@ -932,7 +932,7 @@ export default function VideoCall({ onExit, onOpenClose }: VideoCallProps) {
       {showRegisterOverlay && (
         <div className="vc-register-overlay">
           <Suspense fallback={null}>
-            <RegisterForm onSubmit={handleRegisterSubmit} />
+            <RegisterForm onSubmit={handleRegisterSubmit} onDismiss={() => setShowRegisterOverlay(false)} />
           </Suspense>
         </div>
       )}

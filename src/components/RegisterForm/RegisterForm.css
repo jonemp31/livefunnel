@@ -258,6 +258,44 @@
   box-shadow: 0 4px 16px rgba(255, 45, 120, 0.25);
 }
 
+/* ── Close button (X) ── */
+.reg-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.5);
+  transition: background 0.15s, color 0.15s;
+  z-index: 2;
+}
+.reg-close-btn:active {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+/* ── Dismiss link ── */
+.reg-dismiss-link {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  text-align: center;
+  padding: 6px 0;
+}
+
 /* ── Animations ── */
 @keyframes regFadeIn {
   from { opacity: 0; }
