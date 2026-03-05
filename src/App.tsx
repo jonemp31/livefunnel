@@ -1,10 +1,12 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react'
 import ProfileCard from './components/ProfileCard/ProfileCard'
 import WelcomePopup from './components/WelcomePopup/WelcomePopup'
-import RegisterForm from './components/RegisterForm/RegisterForm'
-import VideoCall from './components/VideoCall/VideoCall'
-import ClosePage from './components/ClosePage/ClosePage'
 import { mockUser } from './data/mockUser'
+
+// Lazy-loaded heavy components (code splitting)
+const RegisterForm = lazy(() => import('./components/RegisterForm/RegisterForm'))
+const VideoCall = lazy(() => import('./components/VideoCall/VideoCall'))
+const ClosePage = lazy(() => import('./components/ClosePage/ClosePage'))
 
 export default function App() {
   const [entered, setEntered] = useState(false)
@@ -71,38 +73,19 @@ export default function App() {
     setInCall(true)
   }
 
-  // Attach a click listener on the AudioRoomBanner "Entrar" button
-  useEffect(() => {
-    if (!entered || inCall) return
-    const observer = new MutationObserver(() => {
-      const btn = document.querySelector('.audio-room-banner__btn')
-      if (btn) {
-        btn.addEventListener('click', handleEnterClick)
-        observer.disconnect()
-      }
-    })
-    observer.observe(document.body, { childList: true, subtree: true })
-    const btn = document.querySelector('.audio-room-banner__btn')
-    if (btn) {
-      btn.addEventListener('click', handleEnterClick)
-      observer.disconnect()
-    }
-    return () => observer.disconnect()
-  }, [entered, inCall])
-
   // If showing close page, render it
   if (showClosePage) {
-    return <ClosePage />
+    return <Suspense fallback={null}><ClosePage /></Suspense>
   }
 
   // If in video call, render VideoCall fullscreen
   if (inCall) {
-    return <VideoCall onExit={() => setInCall(false)} onOpenClose={() => setShowClosePage(true)} />
+    return <Suspense fallback={null}><VideoCall onExit={() => setInCall(false)} onOpenClose={() => setShowClosePage(true)} /></Suspense>
   }
 
   // Registration form overlay
   if (showRegister) {
-    return <RegisterForm onSubmit={handleRegisterSubmit} />
+    return <Suspense fallback={null}><RegisterForm onSubmit={handleRegisterSubmit} /></Suspense>
   }
 
   return (
@@ -116,7 +99,7 @@ export default function App() {
         />
       ) : (
         <>
-          <ProfileCard user={mockUser} />
+          <ProfileCard user={mockUser} onEnterClick={handleEnterClick} />
           {showTimedPopup && (
             <WelcomePopup
               avatarUrl={mockUser.avatarUrl}

@@ -5,6 +5,18 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Live GIRL</title>
+
+    <!-- OG / Social sharing -->
+    <meta property="og:title" content="Live GIRL – Ao Vivo Agora" />
+    <meta property="og:description" content="Assista lives exclusivas e conteúdos +18 sem censura." />
+    <meta property="og:image" content="https://julia.livegirl.win/foto1.jpg" />
+    <meta property="og:url" content="https://julia.livegirl.win/" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Preload LCP image -->
+    <link rel="preload" as="image" href="/foto1.jpg" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -24,7 +36,16 @@
   </head>
   <body>
     <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1613101883006618&ev=PageView&noscript=1" /></noscript>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Inline splash: shown until React hydrates -->
+      <div style="display:flex;align-items:center;justify-content:center;height:100vh;height:100dvh;background:#0a0a0a;">
+        <div style="text-align:center;">
+          <div style="width:56px;height:56px;border:3px solid rgba(255,255,255,.15);border-top-color:#e879f9;border-radius:50%;animation:sp .7s linear infinite;margin:0 auto;"></div>
+          <p style="color:#a1a1aa;font-family:Inter,system-ui,sans-serif;font-size:13px;margin-top:16px;">Carregando...</p>
+        </div>
+      </div>
+      <style>@keyframes sp{to{transform:rotate(360deg)}}</style>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

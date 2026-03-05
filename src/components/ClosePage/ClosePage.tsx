@@ -1,68 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 import './ClosePage.css'
 
-async function fetchCity(): Promise<string> {
-  // 1) Cloudflare trace — works on any CF-proxied domain
-  try {
-    const res = await fetch('/cdn-cgi/trace')
-    if (res.ok) {
-      const text = await res.text()
-      const ip = text.match(/ip=(.+)/)?.[1]
-      if (ip) {
-        const geoRes = await fetch(`https://ipapi.co/${ip}/json/`)
-        if (geoRes.ok) {
-          const data = await geoRes.json()
-          if (data.city && data.region_code) {
-            const stateAbbr = getStateAbbr(data.region) || data.region_code
-            return `${data.city}/${stateAbbr}`
-          }
-        }
-      }
-    }
-  } catch { /* fallback */ }
-  // 2) ipapi.co direct
-  try {
-    const res = await fetch('https://ipapi.co/json/')
-    if (res.ok) {
-      const data = await res.json()
-      if (data.city && data.region_code) {
-        const stateAbbr = getStateAbbr(data.region) || data.region_code
-        return `${data.city}/${stateAbbr}`
-      }
-    }
-  } catch { /* fallback */ }
-  // 3) ip-api.com (HTTP, localhost only)
-  try {
-    const res = await fetch('http://ip-api.com/json/?fields=city,regionName')
-    if (res.ok) {
-      const data = await res.json()
-      if (data.city && data.regionName) {
-        const stateAbbr = getStateAbbr(data.regionName) || data.regionName
-        return `${data.city}/${stateAbbr}`
-      }
-    }
-  } catch { /* fallback */ }
-  return 'Campinas/SP'
-}
-
-function getStateAbbr(stateName: string): string | null {
-  const states: Record<string, string> = {
-    'Acre': 'AC', 'Alagoas': 'AL', 'Amapá': 'AP', 'Amazonas': 'AM',
-    'Bahia': 'BA', 'Ceará': 'CE', 'Distrito Federal': 'DF',
-    'Espírito Santo': 'ES', 'Goiás': 'GO', 'Maranhão': 'MA',
-    'Mato Grosso': 'MT', 'Mato Grosso do Sul': 'MS', 'Minas Gerais': 'MG',
-    'Pará': 'PA', 'Paraíba': 'PB', 'Paraná': 'PR', 'Pernambuco': 'PE',
-    'Piauí': 'PI', 'Rio de Janeiro': 'RJ', 'Rio Grande do Norte': 'RN',
-    'Rio Grande do Sul': 'RS', 'Rondônia': 'RO', 'Roraima': 'RR',
-    'Santa Catarina': 'SC', 'São Paulo': 'SP', 'Sergipe': 'SE',
-    'Tocantins': 'TO',
-    'Sao Paulo': 'SP', 'Espirito Santo': 'ES', 'Goias': 'GO',
-    'Maranhao': 'MA', 'Ceara': 'CE', 'Amapa': 'AP', 'Piaui': 'PI',
-    'Paraiba': 'PB', 'Rondonia': 'RO', 'Para': 'PA',
-  }
-  return states[stateName] || null
-}
-
 interface ClosePageProps {
 }
 
@@ -75,10 +13,41 @@ const MEDIA_ITEMS = [
   { id: 'c6', videoUrl: '/loira6.mp4' },
 ]
 
+const TOAST_NAMES = [
+  'Pedro', 'Lucas', 'Gabriel', 'Matheus', 'Rafael',
+  'Bruno', 'Felipe', 'Gustavo', 'Thiago', 'Leonardo',
+  'André', 'Diego', 'Carlos', 'Eduardo', 'Marcelo',
+  'Rodrigo', 'Fernando', 'Vinícius', 'Henrique', 'Renato',
+  'Daniel', 'Ricardo', 'Caio', 'João', 'Murilo',
+  'Victor', 'Leandro', 'Alex', 'Fábio', 'Guilherme'
+]
+
+const FAQ_ITEMS = [
+  {
+    q: '🔒 É seguro fazer o pagamento?',
+    a: 'Sim! O pagamento é feito via PIX, direto pelo app do seu banco. Não pedimos senha, cartão ou dados pessoais. É rápido, seguro e anônimo.'
+  },
+  {
+    q: '⏳ Quanto tempo demora pra liberar o acesso?',
+    a: 'O acesso é liberado automaticamente após a confirmação do PIX, que geralmente leva de 5 segundos a 2 minutos.'
+  },
+  {
+    q: '👤 Alguém vai saber que eu comprei?',
+    a: 'Não! O pagamento via PIX não aparece com nome de conteúdo adulto na fatura. Seu acesso é 100% discreto e privado.'
+  },
+  {
+    q: '📱 Como vou receber o conteúdo?',
+    a: 'Após o pagamento, você recebe acesso imediato ao grupo exclusivo com todas as mídias, vídeos e fotos disponíveis.'
+  },
+  {
+    q: '💰 Tem mensalidade ou cobrança recorrente?',
+    a: 'Não! É um pagamento único. Você paga uma vez e tem acesso vitalício a todo o conteúdo, sem surpresas.'
+  }
+]
+
 export default function ClosePage({}: ClosePageProps) {
   const videoRefs = useRef<Map<string, HTMLVideoElement>>(new Map())
   const [activeId, setActiveId] = useState<string | null>(null)
-  const [city, setCity] = useState('')
   const [showPixPopup, setShowPixPopup] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<'simples' | 'vip' | null>(null)
   const [orderBump, setOrderBump] = useState(false)
@@ -88,15 +57,6 @@ export default function ClosePage({}: ClosePageProps) {
   const [faqOpen, setFaqOpen] = useState<number | null>(null)
   const [toast, setToast] = useState<{ name: string; visible: boolean } | null>(null)
   const [vagasLeft, setVagasLeft] = useState(17)
-
-  const TOAST_NAMES = [
-    'Pedro', 'Lucas', 'Gabriel', 'Matheus', 'Rafael',
-    'Bruno', 'Felipe', 'Gustavo', 'Thiago', 'Leonardo',
-    'André', 'Diego', 'Carlos', 'Eduardo', 'Marcelo',
-    'Rodrigo', 'Fernando', 'Vinícius', 'Henrique', 'Renato',
-    'Daniel', 'Ricardo', 'Caio', 'João', 'Murilo',
-    'Victor', 'Leandro', 'Alex', 'Fábio', 'Guilherme'
-  ]
 
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout>
@@ -131,7 +91,6 @@ export default function ClosePage({}: ClosePageProps) {
     return () => clearInterval(iv)
   }, [])
   useEffect(() => {
-    fetchCity().then(setCity)
     // Meta Pixel: InitiateCheckout on ClosePage
     if (typeof window.fbq === 'function') window.fbq('track', 'InitiateCheckout')
   }, [])
@@ -259,7 +218,7 @@ export default function ClosePage({}: ClosePageProps) {
           </div>
         </div>
         <p className="close-page__bio">
-          Oi amor, meu nome é Julia e tenho 22 aninhos. Faço faculdade em {city || 'Campinas/SP'} e sou a loirinha com os peitos e a bunda mais gostosos que você já viu 😈🔥 <strong>Aqui tem putaria explícita, sem censura, com vídeos quentes sozinha e com convidados…</strong> Muito sexo, muitas gozadas e zero enrolação. Entra se tiver coragem! Vem ser feliz, vem? 🙈
+          Oi amor, meu nome é Julia e tenho 22 aninhos. Faço faculdade em Campinas/SP e sou a loirinha com os peitos e a bunda mais gostosos que você já viu 😈🔥 <strong>Aqui tem putaria explícita, sem censura, com vídeos quentes sozinha e com convidados…</strong> Muito sexo, muitas gozadas e zero enrolação. Entra se tiver coragem! Vem ser feliz, vem? 🙈
         </p>
       </div>
 
@@ -417,28 +376,7 @@ export default function ClosePage({}: ClosePageProps) {
       {/* FAQ */}
       <div className="close-page__faq">
         <h2 className="close-page__faq-title">Perguntas Frequentes</h2>
-        {[
-          {
-            q: '🔒 É seguro fazer o pagamento?',
-            a: 'Sim! O pagamento é feito via PIX, direto pelo app do seu banco. Não pedimos senha, cartão ou dados pessoais. É rápido, seguro e anônimo.'
-          },
-          {
-            q: '⏳ Quanto tempo demora pra liberar o acesso?',
-            a: 'O acesso é liberado automaticamente após a confirmação do PIX, que geralmente leva de 5 segundos a 2 minutos.'
-          },
-          {
-            q: '👤 Alguém vai saber que eu comprei?',
-            a: 'Não! O pagamento via PIX não aparece com nome de conteúdo adulto na fatura. Seu acesso é 100% discreto e privado.'
-          },
-          {
-            q: '📱 Como vou receber o conteúdo?',
-            a: 'Após o pagamento, você recebe acesso imediato ao grupo exclusivo com todas as mídias, vídeos e fotos disponíveis.'
-          },
-          {
-            q: '💰 Tem mensalidade ou cobrança recorrente?',
-            a: 'Não! É um pagamento único. Você paga uma vez e tem acesso vitalício a todo o conteúdo, sem surpresas.'
-          }
-        ].map((item, i) => (
+        {FAQ_ITEMS.map((item, i) => (
           <div key={i} className={`close-page__faq-item${faqOpen === i ? ' close-page__faq-item--open' : ''}`}>
             <button className="close-page__faq-question" onClick={() => setFaqOpen(faqOpen === i ? null : i)}>
               <span>{item.q}</span>

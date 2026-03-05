@@ -11,9 +11,10 @@ import './ProfileCard.css'
 
 interface ProfileCardProps {
   user: UserProfile
+  onEnterClick?: () => void
 }
 
-export default function ProfileCard({ user }: ProfileCardProps) {
+export default function ProfileCard({ user, onEnterClick }: ProfileCardProps) {
   return (
     <article className="profile-card" role="region" aria-label={`Perfil de ${user.name}`}>
       {/* ── Hero Image ── */}
@@ -30,7 +31,7 @@ export default function ProfileCard({ user }: ProfileCardProps) {
           <UserMeta userId={user.userId} gender={user.gender} age={user.age} />
 
           {user.isLive && (
-            <AudioRoomBanner label={user.liveRoomLabel} />
+            <AudioRoomBanner label={user.liveRoomLabel} onClick={onEnterClick} />
           )}
 
           <SalesText name="Julia" age={22} />
