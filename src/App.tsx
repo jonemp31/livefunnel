@@ -8,6 +8,11 @@ const RegisterForm = lazy(() => import('./components/RegisterForm/RegisterForm')
 const VideoCall = lazy(() => import('./components/VideoCall/VideoCall'))
 const ClosePage = lazy(() => import('./components/ClosePage/ClosePage'))
 
+// Prefetch helpers — download chunk in background so it's instant when needed
+const prefetchRegisterForm = () => { import('./components/RegisterForm/RegisterForm') }
+const prefetchVideoCall = () => { import('./components/VideoCall/VideoCall') }
+const prefetchClosePage = () => { import('./components/ClosePage/ClosePage') }
+
 export default function App() {
   const [entered, setEntered] = useState(false)
   const [showTimedPopup, setShowTimedPopup] = useState(false)
@@ -39,6 +44,8 @@ export default function App() {
       schedulePopup(45000) // 45 seconds
       // Meta Pixel: ViewContent on ProfileCard (grid 3x3)
       if (typeof window.fbq === 'function') window.fbq('track', 'ViewContent', { content_name: 'Perfil Julia' })
+      // Prefetch next step (RegisterForm) while user browses the profile
+      prefetchRegisterForm()
     }
   }, [entered, schedulePopup])
 
@@ -63,6 +70,16 @@ export default function App() {
     if (timerRef.current) clearTimeout(timerRef.current)
     setShowRegister(true)
   }
+
+  // Prefetch VideoCall as soon as RegisterForm is shown
+  useEffect(() => {
+    if (showRegister) prefetchVideoCall()
+  }, [showRegister])
+
+  // Prefetch ClosePage as soon as VideoCall is shown
+  useEffect(() => {
+    if (inCall) prefetchClosePage()
+  }, [inCall])
 
   // After registration, enter the video call
   const handleRegisterSubmit = (data: { nickname: string; contact: string; birthDate: string }) => {
