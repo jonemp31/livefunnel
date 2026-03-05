@@ -16,7 +16,6 @@ const prefetchClosePage = () => { import('./components/ClosePage/ClosePage') }
 export default function App() {
   const [entered, setEntered] = useState(false)
   const [showTimedPopup, setShowTimedPopup] = useState(false)
-  const [showRegister, setShowRegister] = useState(false)
   const [inCall, setInCall] = useState(false)
   const [showClosePage, setShowClosePage] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -41,11 +40,12 @@ export default function App() {
   // Start timer once user enters the page
   useEffect(() => {
     if (entered && !hasClickedEnter.current) {
-      schedulePopup(45000) // 45 seconds
+      schedulePopup(20000) // 20 seconds
       // Meta Pixel: ViewContent on ProfileCard (grid 3x3)
       if (typeof window.fbq === 'function') window.fbq('track', 'ViewContent', { content_name: 'Perfil Julia' })
-      // Prefetch next step (RegisterForm) while user browses the profile
+      // Prefetch next steps while user browses the profile
       prefetchRegisterForm()
+      prefetchVideoCall()
     }
   }, [entered, schedulePopup])
 
@@ -53,42 +53,28 @@ export default function App() {
   const handleDismiss = () => {
     setShowTimedPopup(false)
     isFirstPopup.current = false
-    schedulePopup(90000) // 90 seconds
+    schedulePopup(45000) // 45 seconds
   }
 
-  // When user clicks CTA, show registration form
+  // When user clicks CTA → go directly to VideoCall
   const handleAccept = () => {
     setShowTimedPopup(false)
     hasClickedEnter.current = true
     if (timerRef.current) clearTimeout(timerRef.current)
-    setShowRegister(true)
+    setInCall(true)
   }
 
-  // Listen for "Entrar" button click → show registration form
+  // Listen for "Entrar" button click → go directly to VideoCall
   const handleEnterClick = () => {
     hasClickedEnter.current = true
     if (timerRef.current) clearTimeout(timerRef.current)
-    setShowRegister(true)
+    setInCall(true)
   }
-
-  // Prefetch VideoCall as soon as RegisterForm is shown
-  useEffect(() => {
-    if (showRegister) prefetchVideoCall()
-  }, [showRegister])
 
   // Prefetch ClosePage as soon as VideoCall is shown
   useEffect(() => {
     if (inCall) prefetchClosePage()
   }, [inCall])
-
-  // After registration, enter the video call
-  const handleRegisterSubmit = (data: { nickname: string; contact: string; birthDate: string }) => {
-    console.log('[Register]', data)
-    // Meta Pixel: Lead on registration
-    if (typeof window.fbq === 'function') window.fbq('track', 'Lead', { content_name: 'Cadastro Perfil' })
-    setShowRegister(false)
-    setInCall(true)
-  }
 
   // If showing close page, render it
   if (showClosePage) {
@@ -98,11 +84,6 @@ export default function App() {
   // If in video call, render VideoCall fullscreen
   if (inCall) {
     return <Suspense fallback={null}><VideoCall onExit={() => setInCall(false)} onOpenClose={() => setShowClosePage(true)} /></Suspense>
-  }
-
-  // Registration form overlay
-  if (showRegister) {
-    return <Suspense fallback={null}><RegisterForm onSubmit={handleRegisterSubmit} /></Suspense>
   }
 
   return (

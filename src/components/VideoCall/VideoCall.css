@@ -783,6 +783,19 @@
   box-shadow: 0 6px 24px rgba(255, 45, 120, 0.4);
 }
 
+/* ── Register Overlay (over live video) ── */
+.vc-register-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  animation: vcFadeIn 0.25s ease-out;
+}
+
 /* ── End Call Confirm ── */
 .vc-end-confirm-overlay {
   position: fixed;

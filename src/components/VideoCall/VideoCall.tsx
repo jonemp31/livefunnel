@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, lazy, Suspense } from 'react'
 import Hls from 'hls.js'
 import './VideoCall.css'
+
+const RegisterForm = lazy(() => import('../RegisterForm/RegisterForm'))
 
 // Data imports (extracted for code splitting)
 import {
@@ -48,6 +50,8 @@ export default function VideoCall({ onExit, onOpenClose }: VideoCallProps) {
   const [showCtaCard, setShowCtaCard] = useState(false)
   const [ctaFading, setCtaFading] = useState<'in' | 'out' | null>(null)
   const ctaShownTimesRef = useRef<Set<number>>(new Set())
+  const [isRegistered, setIsRegistered] = useState(false)
+  const [showRegisterOverlay, setShowRegisterOverlay] = useState(false)
   const [hasPreviouslyAccessed] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem(STORAGE_KEY) === 'true'
@@ -564,23 +568,40 @@ export default function VideoCall({ onExit, onOpenClose }: VideoCallProps) {
     setTimeout(() => heart.remove(), 3000)
   }, [])
 
+  // Gate user actions behind registration
+  const requireRegistration = useCallback((): boolean => {
+    if (isRegistered) return true
+    setShowRegisterOverlay(true)
+    return false
+  }, [isRegistered])
+
+  const handleRegisterSubmit = useCallback((data: { nickname: string; contact: string; birthDate: string }) => {
+    console.log('[Register]', data)
+    if (typeof window.fbq === 'function') window.fbq('track', 'Lead', { content_name: 'Cadastro Perfil' })
+    setIsRegistered(true)
+    setShowRegisterOverlay(false)
+  }, [])
+
   const sendHeart = useCallback(() => {
+    if (!requireRegistration()) return
     setChatMessages(prev => [...prev, { id: `heart-${Date.now()}`, type: 'message' as const, author: 'Você', text: '❤️', isOwn: true, isHost: false }].slice(-50))
     setTimeout(() => scrollToBottom(), 0)
     createHeart()
-  }, [scrollToBottom, createHeart])
+  }, [scrollToBottom, createHeart, requireRegistration])
 
   const sendMessage = useCallback(() => {
+    if (!requireRegistration()) return
     if (!chatInput.trim()) return
     setChatMessages(prev => [...prev, { id: `me-${Date.now()}`, type: 'message' as const, author: 'Você', text: chatInput.trim(), isOwn: true, isHost: false }].slice(-50))
     setChatInput('')
     setTimeout(() => scrollToBottom(), 0)
-  }, [chatInput, scrollToBottom])
+  }, [chatInput, scrollToBottom, requireRegistration])
 
   const sendQuickReaction = useCallback((text: string) => {
+    if (!requireRegistration()) return
     setChatMessages(prev => [...prev, { id: `qr-${Date.now()}`, type: 'message' as const, author: 'Você', text, isOwn: true, isHost: false }].slice(-50))
     setTimeout(() => scrollToBottom(), 0)
-  }, [scrollToBottom])
+  }, [scrollToBottom, requireRegistration])
 
   const sendFinalMessages = useCallback(() => {
     let cumulativeDelay = 0
@@ -890,7 +911,8 @@ export default function VideoCall({ onExit, onOpenClose }: VideoCallProps) {
             type="text"
             value={chatInput}
             onChange={e => setChatInput(e.target.value)}
-            onKeyPress={e => { if (e.key === 'Enter') sendMessage() }}
+            onFocus={e => { if (!isRegistered) { e.target.blur(); setShowRegisterOverlay(true) } }}
+            onKeyDown={e => { if (e.key === 'Enter') sendMessage() }}
             placeholder="Diga Oi..."
             maxLength={200}
           />
@@ -905,6 +927,15 @@ export default function VideoCall({ onExit, onOpenClose }: VideoCallProps) {
           <button className="vc-live-input-icon vc-live-gift-btn" onClick={sendHeart} title="Presente">🎁</button>
         </div>
       </div>
+
+      {/* Register overlay — appears over the live video */}
+      {showRegisterOverlay && (
+        <div className="vc-register-overlay">
+          <Suspense fallback={null}>
+            <RegisterForm onSubmit={handleRegisterSubmit} />
+          </Suspense>
+        </div>
+      )}
 
       {/* End call confirm */}
       {showEndCallConfirm && (
